@@ -1,0 +1,8 @@
+Usage: errcode [OPTION]...
+Working directory must be Go module root.
+
+Options:
+      --prefix PREFIX  add a prefix to generated error codes;
+                         must be a valid exportable Go identifier
+                         and at most 10 characters long
+      --help           display this help and exit
