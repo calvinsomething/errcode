@@ -7,7 +7,9 @@ import (
 )
 
 func printVersion(_ string) {
-	// use git describe
+	log.Println(version)
+
+	os.Exit(0)
 }
 
 func printHelp(_ string) {
