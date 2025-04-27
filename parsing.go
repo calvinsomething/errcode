@@ -11,17 +11,16 @@ import (
 
 type (
 	fileSyntax struct {
-		fileName string
-		pkg      *packages.Package
-		ast      *ast.File
+		fileName  string
+		pkg       *packages.Package
+		ast       *ast.File
 		didUpdate bool
 	}
 
 	funcUse struct {
-		pos token.Pos
+		pos  token.Pos
 		fset *token.FileSet
 	}
-
 
 	decl struct {
 		name string
@@ -31,7 +30,7 @@ type (
 )
 
 var (
-	errcodePath string
+	errcodePath  string
 	errcodeScope *types.Scope
 
 	files []*fileSyntax
@@ -66,7 +65,7 @@ func loadExistingCodes(p *packages.Package, s *ast.File) {
 func storeFileThatImportsErrcode(p *packages.Package, f *ast.File, fileName string) {
 	for _, impt := range f.Imports {
 		// remove quotes from import and compare it to packagePath
-		if len(impt.Path.Value) == (len(errcodePath) + 2) && impt.Path.Value[1:len(errcodePath) + 1] == errcodePath {
+		if len(impt.Path.Value) == (len(errcodePath)+2) && impt.Path.Value[1:len(errcodePath)+1] == errcodePath {
 			files = append(files, &fileSyntax{
 				fileName: fileName,
 				pkg:      p,
@@ -113,5 +112,3 @@ func loadTargetModule() {
 		}
 	}
 }
-
-

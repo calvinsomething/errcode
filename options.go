@@ -37,13 +37,13 @@ func getNextHandler(a string) func(string) {
 	option := parseOption(a)
 
 	switch option {
-		case "help":
-			return printHelp
-		case "prefix":
-			return setPrefix
-		default:
-			log.Fatal("invalid option: --" + option)
-			return nil
+	case "help":
+		return printHelp
+	case "prefix":
+		return setPrefix
+	default:
+		log.Fatal("invalid option: --" + option)
+		return nil
 	}
 }
 

@@ -27,6 +27,6 @@ func TestNewCodeWithPrefix(t *testing.T) {
 	prefix = "Test"
 
 	for i := 0; i < 100; i++ {
-		validateCode(t, newCode(), length + len(prefix))
+		validateCode(t, newCode(), length+len(prefix))
 	}
 }

@@ -11,9 +11,9 @@ import (
 )
 
 const (
-	newIdent = "New"
+	newIdent           = "New"
 	exportedErrorIdent = "Error"
-	length = 5
+	length             = 5
 )
 
 var prefix string
@@ -23,10 +23,10 @@ func newCode() string {
 	code := make([]rune, length)
 
 	for i := range code {
-		if i % 2 == 0 {
-			code[i] = 'A' + rune(rand.Uint32() % 26)
+		if i%2 == 0 {
+			code[i] = 'A' + rune(rand.Uint32()%26)
 		} else {
-			code[i] = '0' + rune(rand.Uint32() % 10)
+			code[i] = '0' + rune(rand.Uint32()%10)
 		}
 	}
 
@@ -64,12 +64,12 @@ func updateCalls() {
 
 							f.didUpdate = true
 
-							decls[code] = &decl{ name: sel.Sel.Name }
+							decls[code] = &decl{name: sel.Sel.Name}
 						}
 
 						if decl, ok := decls[sel.Sel.Name]; ok {
 							decl.uses = append(decl.uses, funcUse{
-								pos: f.pkg.TypesInfo.ObjectOf(sel.Sel).Pos(),
+								pos:  f.pkg.TypesInfo.ObjectOf(sel.Sel).Pos(),
 								fset: f.pkg.Fset,
 							})
 						} else {

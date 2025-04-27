@@ -63,10 +63,10 @@ func readFileRelativeToExe(basename string) []byte {
 func doInitialFileWrite() {
 	input := readFileRelativeToExe("errcode.go")
 
-	// skip line with build directive
+	// skip line with build directive + following blank
 	for i, b := range input {
 		if b == '\n' {
-			input = input[i+1:]
+			input = input[i+2:]
 			break
 		}
 	}
