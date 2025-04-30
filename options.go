@@ -1,15 +1,17 @@
 package main
 
 import (
+	_ "embed"
 	"go/token"
 	"log"
 	"os"
 )
 
-func printHelp(_ string) {
-	b := readFileRelativeToExe("help.txt")
+//go:embed help.txt
+var help []byte
 
-	_, err := os.Stdout.Write(b)
+func printHelp(_ string) {
+	_, err := os.Stdout.Write(help)
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -1,11 +1,11 @@
 package main
 
 import (
+	_ "embed"
 	"errors"
 	"fmt"
 	"log"
 	"os"
-	"path"
 )
 
 var generatedFile *os.File
@@ -46,22 +46,11 @@ func initMissingPackage() {
 	os.Exit(0)
 }
 
-func readFileRelativeToExe(basename string) []byte {
-	exe, err := os.Executable()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	b, err := os.ReadFile(path.Join(path.Dir(exe), basename))
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	return b
-}
+//go:embed errcode.go
+var initialFileContents []byte
 
 func doInitialFileWrite() {
-	input := readFileRelativeToExe("errcode.go")
+	input := initialFileContents
 
 	// skip line with build directive + following blank
 	for i, b := range input {
