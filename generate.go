@@ -72,7 +72,7 @@ const codesBeginComment = `
 `
 
 const declFmt = `
-// %s returns an errcode.Error constructed NewErrorFunc
+// %s returns an Error constructed by NewErrorFunc.
 func %s(e error, m ...string) Error {
 	return NewErrorFunc(e, "%s", m...)
 }
