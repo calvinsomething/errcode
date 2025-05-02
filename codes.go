@@ -26,7 +26,7 @@ func newCode() string {
 		if i%2 == 0 {
 			code[i] = 'A' + rune(rand.Uint32()%26)
 		} else {
-			code[i] = '0' + rune(rand.Uint32()%10)
+			code[i] = '1' + rune(rand.Uint32()%9)
 		}
 	}
 
