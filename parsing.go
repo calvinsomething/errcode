@@ -53,8 +53,6 @@ func loadExistingCodes(p *packages.Package, s *ast.File) {
 					}
 				}
 			}
-
-			return false
 		}
 
 		return true
