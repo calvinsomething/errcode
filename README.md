@@ -13,13 +13,13 @@ Add `//go:generate go run github.com/calvinsomething/errcode` to any Go file in 
 Use `errcode.New` in your code to construct an `errcode.Error`. Running `go generate` now will replace any instance of `New` with an equivalent function with an error code as an identifier, and an `Error.Code` value equal to the same error code used as the function name.
 
 ```
-  return errcode.New(err, "Invalid image format.")
+	return errcode.New(err, "Invalid image format.")
 ```
 
 becomes:
 
 ```
-  return errcode.K9S6O(err, "Invalid image format.")
+	return errcode.K9S6O(err, "Invalid image format.")
 ```
 
 The functions will be declared in the generated errcode package.
