@@ -6,6 +6,7 @@ package errcode
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"unsafe"
 )
 

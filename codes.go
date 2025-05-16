@@ -54,27 +54,40 @@ func updateCalls() {
 					}
 
 					if obj.Pkg().Scope() == errcodeScope {
-						if sel.Sel.Name == newIdent {
-							code := newCode()
-							for decls[code] != nil {
-								code = newCode()
+						for {
+							if sel.Sel.Name == newIdent {
+								code := newCode()
+								for decls[code] != nil {
+									code = newCode()
+								}
+
+								sel.Sel.Name = code
+
+								f.didUpdate = true
+
+								decls[code] = &decl{name: sel.Sel.Name}
 							}
 
-							sel.Sel.Name = code
-
-							f.didUpdate = true
-
-							decls[code] = &decl{name: sel.Sel.Name}
-						} else if _, ok := originalExportedIdents[sel.Sel.Name]; !ok {
-							if decl, ok := decls[sel.Sel.Name]; ok {
-								decl.uses = append(decl.uses, funcUse{
-									pos:  f.pkg.TypesInfo.ObjectOf(sel.Sel).Pos(),
-									fset: f.pkg.Fset,
-								})
-							} else {
-								// should not be possible
-								log.Fatalf("unknown errcode identifier '%s'", sel.Sel.Name)
+							if _, ok := originalExportedIdents[sel.Sel.Name]; !ok {
+								if decl, ok := decls[sel.Sel.Name]; ok {
+									decl.uses = append(decl.uses, funcUse{
+										pos:  f.pkg.TypesInfo.ObjectOf(sel.Sel).Pos(),
+										fset: f.pkg.Fset,
+									})
+								} else {
+									// should not be possible
+									log.Fatalf("unknown errcode identifier '%s'", sel.Sel.Name)
+								}
 							}
+
+							if x, ok := sel.X.(*ast.CallExpr); ok {
+								if s, ok := x.Fun.(*ast.SelectorExpr); ok {
+									sel = s
+									continue
+								}
+							}
+
+							break
 						}
 					}
 
