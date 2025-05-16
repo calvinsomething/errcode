@@ -11,7 +11,7 @@ import (
 
 // NewErrorFunc is the function called when constructing the Error
 // returned by errcode.New and any error code func calls.
-var NewErrorFunc = newError
+var NewErrorFunc = DefaultNewErrorFunc
 
 type (
 	pError struct {
@@ -23,25 +23,14 @@ type (
 	}
 
 	Error struct {
-		*pError
+		p *pError
 	}
 )
 
-// IsErrorCode returns true if err, or any error wrapped by err, is of type Error.
-func IsErrorCode(err error) bool {
-	for {
-		if _, ok := err.(Error); ok {
-			return true
-		}
-
-		if err = errors.Unwrap(err); err == nil {
-			return false
-		}
-	}
-}
-
-func newError(err error, code string, message ...string) Error {
-	p := &pError{Code: code, wrapped: err}
+// DefaultNewErrorFunc is the default constructor used by New and generated errcode functions.
+// Can be overriden by reassigning NewErrorFunc.
+func DefaultNewErrorFunc(code string, message string) Error {
+	p := &pError{Code: code}
 
 	if len(message) != 0 {
 		p.Message = message[0]
@@ -50,40 +39,73 @@ func newError(err error, code string, message ...string) Error {
 	return Error{pError: p}
 }
 
+// Expose unwraps err recursively until finding an Error or Unwrap fails.
+// In either case an Error is returned. An empty Error will return false when calling Error.IsValid().
+func Expose(err error) Error {
+	for {
+		if e, ok := err.(Error); ok {
+			return e
+		}
+
+		if err = errors.Unwrap(err); err == nil {
+			break
+		}
+	}
+
+	return Error{}
+}
+
 // New calls NewErrorFunc and returns the result.
 //
 // Calls to this function will be replaced with an equivalent function,
 // with an error code as an identifier, when using the errcode code generation.
-func New(err error, message ...string) Error {
-	return NewErrorFunc(err, "", message...)
+//
+// messages can optionally be formatted if fmtArgs are passed.
+func New(message string, fmtArgs ...interface{}) Error {
+	if len(fmtArgs) != 0 {
+		return NewErrorFunc("", fmt.Sprintf(message, fmtArgs...))
+	}
+
+	return NewErrorFunc("", message)
 }
 
 // Error returns Error.Message.
 func (e Error) Error() string {
-	return e.Message
+	return e.p.Message
+}
+
+// Wrap wraps err and returns e.
+func (e Error) Wrap(err error) Error {
+	e.p.wrapped = err
+	return e
 }
 
 // Unwrap returns Error.wrapped.
 func (e Error) Unwrap() error {
-	return e.wrapped
+	return e.p.wrapped
 }
 
 // MarshalJSON returns the JSON representation of the Error struct.
 func (e Error) MarshalJSON() ([]byte, error) {
-	return json.Marshal(e.pError)
+	return json.Marshal(e.p)
 }
 
 // GetCode returns e's error code.
 func (e Error) GetCode() string {
-	return e.Code
+	return e.p.Code
+}
+
+// IsValid returns true if e's private implimentation has been initialized.
+func (e Error) IsValid() bool {
+	return e.p != nil
 }
 
 // SetData accepts any pointer type and stores it in err.
 func SetData[T interface{}](err Error, data *T) {
-	err.data = unsafe.Pointer(data)
+	err.p.data = unsafe.Pointer(data)
 }
 
 // GetData returns the unsafe.Pointer stored in err as a *T.
 func GetData[T interface{}](err Error) *T {
-	return (*T)(err.data)
+	return (*T)(err.p.data)
 }

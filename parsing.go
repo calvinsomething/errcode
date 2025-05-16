@@ -37,14 +37,31 @@ var (
 	decls = map[string]*decl{}
 )
 
+var originalExportedIdents = map[string]struct{}{
+	newIdent:              struct{}{},
+	"NewErrorFunc":        struct{}{},
+	"DefaultNewErrorFunc": struct{}{},
+	"Expose":              struct{}{},
+	"Error":               struct{}{},
+	"Wrap":                struct{}{},
+	"Unwrap":              struct{}{},
+	"MarshalJSON":         struct{}{},
+	"GetCode":             struct{}{},
+	"IsValid":             struct{}{},
+	"SetData":             struct{}{},
+	"GetData":             struct{}{},
+}
+
 // loadExistingCodes parses an existing errcode_gen.go file and maps existing
 // function declaration identifiers to their call positions
 func loadExistingCodes(p *packages.Package, s *ast.File) {
 	ast.Inspect(s, func(n ast.Node) bool {
 		switch d := n.(type) {
 		case *ast.FuncDecl:
-			if d.Name.Name == newIdent {
-				errcodeScope = p.TypesInfo.ObjectOf(d.Name).Pkg().Scope()
+			if _, ok := originalExportedIdents[d.Name.Name]; ok {
+				if errcodeScope == nil {
+					errcodeScope = p.TypesInfo.ObjectOf(d.Name).Pkg().Scope()
+				}
 			} else if ast.IsExported(d.Name.Name) {
 				// add func name to decls if result is a single Error struct
 				if d.Type != nil && d.Type.Results != nil {

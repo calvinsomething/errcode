@@ -73,8 +73,8 @@ const codesBeginComment = `
 
 const declFmt = `
 // %s returns an Error constructed by NewErrorFunc.
-func %s(e error, m ...string) Error {
-	return NewErrorFunc(e, "%s", m...)
+func %s(m string, fa ...interface{}) Error {
+	return NewErrorFunc("%s", m, fa...)
 }
 `
 

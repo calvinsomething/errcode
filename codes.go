@@ -65,16 +65,16 @@ func updateCalls() {
 							f.didUpdate = true
 
 							decls[code] = &decl{name: sel.Sel.Name}
-						}
-
-						if decl, ok := decls[sel.Sel.Name]; ok {
-							decl.uses = append(decl.uses, funcUse{
-								pos:  f.pkg.TypesInfo.ObjectOf(sel.Sel).Pos(),
-								fset: f.pkg.Fset,
-							})
-						} else {
-							// should not be possible
-							log.Fatalf("unknown errcode identifier '%s'", sel.Sel.Name)
+						} else if _, ok := originalExportedIdents[sel.Sel.Name]; !ok {
+							if decl, ok := decls[sel.Sel.Name]; ok {
+								decl.uses = append(decl.uses, funcUse{
+									pos:  f.pkg.TypesInfo.ObjectOf(sel.Sel).Pos(),
+									fset: f.pkg.Fset,
+								})
+							} else {
+								// should not be possible
+								log.Fatalf("unknown errcode identifier '%s'", sel.Sel.Name)
+							}
 						}
 					}
 
@@ -111,7 +111,7 @@ func writeFiles() {
 					return err
 				}
 
-				log.Println("Updated errcode function calls in " + f.fileName)
+				log.Println("updated errcode function calls in " + f.fileName)
 
 				return nil
 			})
