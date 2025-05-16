@@ -30,14 +30,16 @@ type (
 
 // DefaultNewErrorFunc is the default constructor used by New and generated errcode functions.
 // Can be overriden by reassigning NewErrorFunc.
-func DefaultNewErrorFunc(code string, message string) Error {
+func DefaultNewErrorFunc(code string, message string, fmtArgs ...interface{}) Error {
 	p := &pError{Code: code}
 
-	if len(message) != 0 {
-		p.Message = message[0]
+	if len(fmtArgs) != 0 {
+		p.Message = fmt.Sprintf(message, fmtArgs...)
+	} else {
+		p.Message = message
 	}
 
-	return Error{pError: p}
+	return Error{p: p}
 }
 
 // Expose unwraps err recursively until finding an Error or Unwrap fails.
