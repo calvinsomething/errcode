@@ -33,6 +33,16 @@ func newCode() string {
 	return prefix + string(code)
 }
 
+func assertSelectorExpr(n ast.Node) *ast.SelectorExpr {
+	if x, ok := n.(*ast.CallExpr); ok {
+		if sel, ok := x.Fun.(*ast.SelectorExpr); ok {
+			return sel
+		}
+	}
+
+	return nil
+}
+
 // updateCalls rewrites any errcode.New calls to errcode.<generated code>
 //
 // updates AST, but does not write to file
@@ -41,58 +51,64 @@ func updateCalls() {
 
 	for _, f := range files {
 		ast.Inspect(f.ast, func(n ast.Node) bool {
-			if x, ok := n.(*ast.CallExpr); ok {
-				if sel, ok := x.Fun.(*ast.SelectorExpr); ok {
-					obj := f.pkg.TypesInfo.ObjectOf(sel.Sel)
-					if obj == nil {
-						didErr = true
+			if sel := assertSelectorExpr(n); sel != nil {
+				obj := f.pkg.TypesInfo.ObjectOf(sel.Sel)
+				if obj == nil {
+					didErr = true
 
-						p := f.pkg.Fset.Position(sel.Pos())
-						log.Printf("%s:%d:%d: undefined identifier '%s'", p.Filename, p.Line, p.Column, sel.Sel.Name)
-
-						return false
-					}
-
-					if obj.Pkg().Scope() == errcodeScope {
-						for {
-							if sel.Sel.Name == newIdent {
-								code := newCode()
-								for decls[code] != nil {
-									code = newCode()
-								}
-
-								sel.Sel.Name = code
-
-								f.didUpdate = true
-
-								decls[code] = &decl{name: sel.Sel.Name}
+					for {
+						if _, ok := originalExportedIdents[sel.Sel.Name]; ok {
+							if s := assertSelectorExpr(sel.X); s != nil {
+								sel = s
+								continue
 							}
-
-							if _, ok := originalExportedIdents[sel.Sel.Name]; !ok {
-								if decl, ok := decls[sel.Sel.Name]; ok {
-									decl.uses = append(decl.uses, funcUse{
-										pos:  f.pkg.TypesInfo.ObjectOf(sel.Sel).Pos(),
-										fset: f.pkg.Fset,
-									})
-								} else {
-									// should not be possible
-									log.Fatalf("unknown errcode identifier '%s'", sel.Sel.Name)
-								}
-							}
-
-							if x, ok := sel.X.(*ast.CallExpr); ok {
-								if s, ok := x.Fun.(*ast.SelectorExpr); ok {
-									sel = s
-									continue
-								}
-							}
-
-							break
 						}
+						break
 					}
+
+					p := f.pkg.Fset.Position(sel.Pos())
+					log.Printf("%s:%d:%d: undefined identifier '%s'", p.Filename, p.Line, p.Column, sel.Sel.Name)
 
 					return false
 				}
+
+				if obj.Pkg().Scope() == errcodeScope {
+					for {
+						if sel.Sel.Name == newIdent {
+							code := newCode()
+							for decls[code] != nil {
+								code = newCode()
+							}
+
+							sel.Sel.Name = code
+
+							f.didUpdate = true
+
+							decls[code] = &decl{name: sel.Sel.Name}
+						}
+
+						if _, ok := originalExportedIdents[sel.Sel.Name]; !ok {
+							if decl, ok := decls[sel.Sel.Name]; ok {
+								decl.uses = append(decl.uses, funcUse{
+									pos:  f.pkg.TypesInfo.ObjectOf(sel.Sel).Pos(),
+									fset: f.pkg.Fset,
+								})
+							} else {
+								// should not be possible
+								log.Fatalf("unknown errcode identifier '%s'", sel.Sel.Name)
+							}
+						}
+
+						if s := assertSelectorExpr(sel.X); s != nil {
+							sel = s
+							continue
+						}
+
+						break
+					}
+				}
+
+				return false
 			}
 
 			return true
