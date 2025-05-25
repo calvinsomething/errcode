@@ -20,9 +20,10 @@ type (
 		Message string `json:"message"`
 
 		wrapped error
-		data    unsafe.Pointer
+		data    interface{}
 	}
 
+	// Error is the struct returned by errcode constructor functions.
 	Error struct {
 		p *pError
 	}
@@ -103,12 +104,13 @@ func (e Error) IsValid() bool {
 	return e.p != nil
 }
 
-// SetData accepts any pointer type and stores it in err.
-func SetData[T interface{}](err Error, data *T) {
-	err.p.data = unsafe.Pointer(data)
+// SetData stores i in e and returns e. Use e.GetData to access i.
+func (e Error) WithData(i interface{}) error {
+	err.p.data = i
+	return e
 }
 
-// GetData returns the unsafe.Pointer stored in err as a *T.
-func GetData[T interface{}](err Error) *T {
-	return (*T)(err.p.data)
+// GetData returns data previously stored in e with e.SetData.
+func (e Error) GetData() interface{} {
+	return err.p.data
 }
