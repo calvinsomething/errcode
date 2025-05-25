@@ -7,7 +7,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"unsafe"
 )
 
 // NewErrorFunc is the function called when constructing the Error
@@ -104,13 +103,13 @@ func (e Error) IsValid() bool {
 	return e.p != nil
 }
 
-// SetData stores i in e and returns e. Use e.GetData to access i.
-func (e Error) WithData(i interface{}) error {
-	err.p.data = i
+// WithData stores i in e and returns e. Use e.GetData to access i.
+func (e Error) WithData(i interface{}) Error {
+	e.p.data = i
 	return e
 }
 
-// GetData returns data previously stored in e with e.SetData.
+// GetData returns data previously stored in e with e.WithData.
 func (e Error) GetData() interface{} {
-	return err.p.data
+	return e.p.data
 }

@@ -48,7 +48,7 @@ var originalExportedIdents = map[string]struct{}{
 	"MarshalJSON":         struct{}{},
 	"GetCode":             struct{}{},
 	"IsValid":             struct{}{},
-	"SetData":             struct{}{},
+	"WithData":            struct{}{},
 	"GetData":             struct{}{},
 }
 
