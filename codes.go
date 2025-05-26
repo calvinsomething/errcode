@@ -57,7 +57,7 @@ func updateCalls() {
 					didErr = true
 
 					for {
-						if _, ok := originalExportedIdents[sel.Sel.Name]; ok {
+						if _, ok := initialExportedIdents[sel.Sel.Name]; ok {
 							if s := assertSelectorExpr(sel.X); s != nil {
 								sel = s
 								continue
@@ -87,7 +87,7 @@ func updateCalls() {
 							decls[code] = &decl{name: sel.Sel.Name}
 						}
 
-						if _, ok := originalExportedIdents[sel.Sel.Name]; !ok {
+						if _, ok := initialExportedIdents[sel.Sel.Name]; !ok {
 							if decl, ok := decls[sel.Sel.Name]; ok {
 								decl.uses = append(decl.uses, funcUse{
 									pos:  f.pkg.TypesInfo.ObjectOf(sel.Sel).Pos(),

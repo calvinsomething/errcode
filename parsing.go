@@ -2,6 +2,7 @@ package main
 
 import (
 	"go/ast"
+	"go/parser"
 	"go/token"
 	"go/types"
 	"log"
@@ -37,19 +38,43 @@ var (
 	decls = map[string]*decl{}
 )
 
-var originalExportedIdents = map[string]struct{}{
-	newIdent:              struct{}{},
-	"NewErrorFunc":        struct{}{},
-	"DefaultNewErrorFunc": struct{}{},
-	"Expose":              struct{}{},
-	"Error":               struct{}{},
-	"Wrap":                struct{}{},
-	"Unwrap":              struct{}{},
-	"MarshalJSON":         struct{}{},
-	"GetCode":             struct{}{},
-	"IsValid":             struct{}{},
-	"WithData":            struct{}{},
-	"GetData":             struct{}{},
+// initialExportedIdents is used to compare against error code constructor declarations
+// as well as potential undefined function calls
+var initialExportedIdents = map[string]struct{}{}
+
+func loadInitialExportedIdents() {
+	fs := token.NewFileSet()
+
+	f, err := parser.ParseFile(fs, "", initialFileContents, 0)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	ast.Inspect(f, func(n ast.Node) bool {
+		switch d := n.(type) {
+		case *ast.FuncDecl:
+			if ast.IsExported(d.Name.Name) {
+				initialExportedIdents[d.Name.Name] = struct{}{}
+			}
+		case *ast.GenDecl:
+			for _, s := range d.Specs {
+				switch s := s.(type) {
+				case *ast.ValueSpec:
+					for _, i := range s.Names {
+						if ast.IsExported(i.Name) {
+							initialExportedIdents[i.Name] = struct{}{}
+						}
+					}
+				case *ast.TypeSpec:
+					if ast.IsExported(s.Name.Name) {
+						initialExportedIdents[s.Name.Name] = struct{}{}
+					}
+				}
+			}
+		}
+
+		return true
+	})
 }
 
 // loadExistingCodes parses an existing errcode_gen.go file and maps existing
@@ -58,7 +83,7 @@ func loadExistingCodes(p *packages.Package, s *ast.File) {
 	ast.Inspect(s, func(n ast.Node) bool {
 		switch d := n.(type) {
 		case *ast.FuncDecl:
-			if _, ok := originalExportedIdents[d.Name.Name]; ok {
+			if _, ok := initialExportedIdents[d.Name.Name]; ok {
 				if errcodeScope == nil {
 					errcodeScope = p.TypesInfo.ObjectOf(d.Name).Pkg().Scope()
 				}

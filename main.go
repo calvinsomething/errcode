@@ -1,13 +1,20 @@
 package main
 
-import "log"
+import (
+	"log"
+	"os"
+)
 
 func main() {
 	log.SetFlags(0)
 
 	handleOptions()
 
-	initMissingPackage()
+	if initMissingPackage() {
+		os.Exit(0)
+	}
+
+	loadInitialExportedIdents()
 
 	loadTargetModule()
 

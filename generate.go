@@ -11,7 +11,7 @@ import (
 var generatedFile *os.File
 
 // initMissingPackage loads the generated package, creating the directory and/or errcode_gen.go if they do not exist
-func initMissingPackage() {
+func initMissingPackage() bool {
 	if _, err := os.Stat("go.mod"); errors.Is(err, os.ErrNotExist) {
 		log.Println("Could not find go.mod file. Working directory must be module root.")
 	} else if err != nil {
@@ -20,7 +20,7 @@ func initMissingPackage() {
 
 	if f, err := os.OpenFile("errcode/errcode_gen.go", os.O_RDWR, 0); err == nil {
 		generatedFile = f
-		return
+		return false
 	} else if !errors.Is(err, os.ErrNotExist) {
 		log.Fatal(err)
 	}
@@ -43,7 +43,7 @@ func initMissingPackage() {
 
 	log.Println("errcode package added to project")
 
-	os.Exit(0)
+	return true
 }
 
 //go:embed errcode.go
