@@ -11,6 +11,8 @@ import (
 
 // NewErrorFunc is the function called when constructing the Error
 // returned by errcode.New and any error code func calls.
+// Call DefaultNewErrorFunc from within the NewErrorFunc implementation
+// to construct the Error object.
 var NewErrorFunc = DefaultNewErrorFunc
 
 type (
@@ -98,7 +100,7 @@ func (e Error) GetCode() string {
 	return e.p.Code
 }
 
-// IsValid returns true if e's private implimentation has been initialized.
+// IsValid returns true if e's private implementation has been initialized.
 func (e Error) IsValid() bool {
 	return e.p != nil
 }
