@@ -18,6 +18,9 @@ var NewErrorFunc = DefaultNewErrorFunc
 // ErrorStringFunc is the implementation of Error.Error.
 var ErrorStringFunc = defaultGetErrorString
 
+// WrapFunc is the implementation of Error.Wrap.
+var WrapFunc = defaultWrapFunc
+
 type (
 	pError struct {
 		Code    string `json:"code"`
@@ -51,6 +54,11 @@ func DefaultNewErrorFunc(code string, message string, fmtArgs ...interface{}) Er
 // Reassign ErrorStringFunc to change how error messages are output.
 func defaultGetErrorString(e Error) string {
 	return e.p.Message
+}
+
+// defaultWrapFunc is the default value of WrapFunc.
+func defaultWrapFunc(e Error, w error) {
+	e.p.wrapped = w
 }
 
 // Expose unwraps err recursively until finding an Error or Unwrap fails.
@@ -90,7 +98,7 @@ func (e Error) Error() string {
 
 // Wrap sets e's private wrapped value to err and returns e.
 func (e Error) Wrap(err error) Error {
-	e.p.wrapped = err
+	WrapFunc(e, err)
 	return e
 }
 
