@@ -15,6 +15,9 @@ import (
 // to construct the Error object.
 var NewErrorFunc = DefaultNewErrorFunc
 
+// ErrorStringFunc is the implementation of Error.Error.
+var ErrorStringFunc = defaultGetErrorString
+
 type (
 	pError struct {
 		Code    string `json:"code"`
@@ -44,8 +47,14 @@ func DefaultNewErrorFunc(code string, message string, fmtArgs ...interface{}) Er
 	return Error{p: p}
 }
 
+// defaultGetErrorString is the default value of ErrorStringFunc.
+// Reassign ErrorStringFunc to change how error messages are output.
+func defaultGetErrorString(e Error) string {
+	return e.p.Message
+}
+
 // Expose unwraps err recursively until finding an Error or Unwrap fails.
-// In either case an Error is returned. An empty Error will return false when calling Error.IsValid().
+// In either case, an Error is returned. An empty Error will return false when calling Error.IsValid.
 func Expose(err error) Error {
 	for {
 		if e, ok := err.(Error); ok {
@@ -65,7 +74,7 @@ func Expose(err error) Error {
 // Calls to this function will be replaced with an equivalent function,
 // with an error code as an identifier, when using the errcode code generation.
 //
-// messages can optionally be formatted if fmtArgs are passed.
+// message can optionally be formatted if fmtArgs is passed.
 func New(message string, fmtArgs ...interface{}) Error {
 	if len(fmtArgs) != 0 {
 		return NewErrorFunc("", fmt.Sprintf(message, fmtArgs...))
@@ -74,18 +83,18 @@ func New(message string, fmtArgs ...interface{}) Error {
 	return NewErrorFunc("", message)
 }
 
-// Error returns Error.Message.
+// Error returns e's error message.
 func (e Error) Error() string {
 	return e.p.Message
 }
 
-// Wrap wraps err and returns e.
+// Wrap sets e's private wrapped value to err and returns e.
 func (e Error) Wrap(err error) Error {
 	e.p.wrapped = err
 	return e
 }
 
-// Unwrap returns Error.wrapped.
+// Unwrap returns e's wrapped error value.
 func (e Error) Unwrap() error {
 	return e.p.wrapped
 }
@@ -105,7 +114,7 @@ func (e Error) IsValid() bool {
 	return e.p != nil
 }
 
-// WithData stores i in e and returns e. Use e.GetData to access i.
+// WithData sets e's private data value to i, then returns e. Use e.GetData to access i.
 func (e Error) WithData(i interface{}) Error {
 	e.p.data = i
 	return e
