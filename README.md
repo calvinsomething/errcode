@@ -35,5 +35,31 @@ func K9S6O(m string, fa ...interface{}) Error {
 ### add a prefix
 Append `--prefix <prefix>` to the run command to add a prefix to any new error code generated; helpful for differentiating between error code sources.
 
-### use your own constructor
-Set `errcode.NewErrorFunc` to override the default `Error` construction.
+### reassignable implementations
+`NewErrorFunc`, `ErrorStringFunc`, and `WrapFunc` can be assigned for customizing the behvarior of `New`, `Error.Error` and `Error.Wrap`, respsectively.
+
+You can reassign these variables from outside of the generated `errcode` pacakage, or you can add a file within the package for access to private members.
+
+Example:
+```
+package errcode
+
+import (
+	"fmt"
+	"runtime"
+)
+
+func myWrapFunc(e Error, w error) {
+	_, file, line, ok := runtime.Caller(2)
+	if !ok {
+		file = "'unknown file'"
+		line = -1
+	}
+
+	e.p.wrapped = fmt.Errorf("%s:%d: %w", file, line, w)
+}
+
+func init() {
+	WrapFunc = myWrapFunc
+}
+```
