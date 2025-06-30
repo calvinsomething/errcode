@@ -4,8 +4,11 @@ import (
 	_ "embed"
 	"errors"
 	"fmt"
+	"iter"
 	"log"
+	"maps"
 	"os"
+	"slices"
 )
 
 var generatedFile *os.File
@@ -85,9 +88,19 @@ func generateDecls() {
 
 	doInitialFileWrite()
 
-	doCodesBeginComment := true
+	sortedCodes := slices.SortedFunc(maps.Keys(decls), func(a, b string) int {
+		if a > b {
+			return 1
+		} else {
+			return -1
+		}
+	})
 
-	for code, decl := range decls {
+	shouldAddCodesStartComment := true
+
+	for _, code := range sortedCodes {
+		decl := decls[code]
+
 		if len(decl.uses) > 1 {
 			log.Printf("multiple calls found for code '%s'", code)
 			for _, use := range decl.uses {
@@ -98,9 +111,9 @@ func generateDecls() {
 			continue
 		}
 
-		if doCodesBeginComment {
+		if shouldAddCodesStartComment {
 			generatedFile.WriteString(codesBeginComment)
-			doCodesBeginComment = false
+			shouldAddCodesStartComment = false
 		}
 
 		fmt.Fprintf(generatedFile, declFmt, code, code, code)
