@@ -88,17 +88,9 @@ func generateDecls() {
 
 	doInitialFileWrite()
 
-	sortedCodes := slices.SortedFunc(maps.Keys(decls), func(a, b string) int {
-		if a > b {
-			return 1
-		} else {
-			return -1
-		}
-	})
-
 	shouldAddCodesStartComment := true
 
-	for _, code := range sortedCodes {
+	for _, code := range slices.Sorted(maps.Keys(decls)) {
 		decl := decls[code]
 
 		if len(decl.uses) > 1 {
