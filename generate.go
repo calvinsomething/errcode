@@ -4,7 +4,6 @@ import (
 	_ "embed"
 	"errors"
 	"fmt"
-	"iter"
 	"log"
 	"maps"
 	"os"
