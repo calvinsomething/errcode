@@ -106,9 +106,9 @@ func updateCalls() {
 
 						break
 					}
-				}
 
-				return false
+					return false
+				}
 			}
 
 			return true
