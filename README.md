@@ -36,9 +36,9 @@ func K9S6O(m string, fa ...interface{}) Error {
 Append `--prefix <prefix>` to the run command to add a prefix to any new error code generated; helpful for differentiating between error code sources.
 
 ### reassignable implementations
-`NewErrorFunc`, `ErrorStringFunc`, and `WrapFunc` can be assigned for customizing the behvarior of `New`, `Error.Error` and `Error.Wrap`, respsectively.
+`NewErrorFunc`, `ErrorStringFunc`, and `WrapFunc` can be assigned for customizing the behavior of `New`, `Error.Error` and `Error.Wrap`, respectively.
 
-You can reassign these variables from outside of the generated `errcode` pacakage, or you can add a file within the package for access to private members.
+You can reassign these variables from outside of the generated `errcode` package, or you can add a file within the package for access to private members.
 
 Example:
 ```
