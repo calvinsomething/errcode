@@ -1,5 +1,5 @@
 # errcode
-A simple codegen module for adding random error codes as function identifiers into a Go project.
+A simple codegen module for generating unique, stable error codes as function identifiers, making errors easily traceable.
 
 ### download the package
 ```
